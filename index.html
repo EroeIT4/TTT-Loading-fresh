@@ -1041,25 +1041,6 @@ function GameDetails(serverName, serverURL, mapName, maxPlayers, steamID, gamemo
     mapImg.style.backgroundImage = "none";
     mapImg.style.filter = "";
   }
-
-  if (steamID && steamID !== '0') {
-    fetchSteam(steamID, function(avatar, name) {
-      if (avatar) {
-        // Usa l'ID corretto che hai nell'HTML
-        var pImg = document.getElementById('player-avatar-img');
-        var pLetter = document.getElementById('player-avatar-letter');
-        if (pImg) {
-          pImg.src = avatar;
-          pImg.style.display = 'block'; 
-          if (pLetter) pLetter.style.display = 'none'; // Nasconde il punto di domanda
-        }
-      }
-      if (name) {
-        document.getElementById('js-player-name').textContent = name;
-        PlayerConnect(name); // Questo forzerà la comparsa del tuo nome e del quadratino
-      }
-    });
-  }
 }
 function SetMapName(mapName) {
   var mapDisplay = document.getElementById('map-name');
