@@ -74,6 +74,10 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--dark); fo
 .bg-slide.active { opacity:1; }
 @keyframes slow-zoom { from{transform:scale(1.07);} to{transform:scale(1.0);} }
 
+#welcome-left-mod {
+  width: 300px;
+  justify-content: center;
+}
 
 #bg-wrap::after {
   content:''; position:absolute; top:0; left:0; right:0; bottom:0;
@@ -274,12 +278,7 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--dark); fo
 }
 
 #player-avatar-wrap {
-  width:50px; height:50px; /* AUMENTATO da 42px */
-  border:2px solid var(--red);
-  overflow:hidden; flex-shrink:0;
-  background:rgba(192,57,43,0.1);
-  display:flex; align-items:center; justify-content:center;
-  position:relative;
+  display: none !important;
 }
 #player-avatar-img {
   width:100%; height:100%; object-fit:cover;
@@ -352,19 +351,22 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--dark); fo
 
 .staff-list { padding:7px 12px; }
 .staff-member {
-  display:flex; align-items:center; gap:10px;
-  padding:6px 0; border-bottom:1px solid rgba(192,57,43,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 .staff-member:last-child { border-bottom:none; }
 /* NUOVO STILE PER AVATAR STAFF COME IMMAGINE */
 .staff-avatar {
-  width:40px; height:40px; border:2px solid var(--border);
-  object-fit: cover;
-  flex-shrink:0;
+  display: none !important;
 }
-.staff-info { flex:1; min-width:0; }
-.staff-name { font-family:var(--body); font-weight:600; font-size:18px; color:#e8e4e0; } /* AUMENTATO da 15px */
-.staff-role { font-family:var(--mono); font-size:12px; letter-spacing:2px; text-transform:uppercase; }
+.staff-info {
+  text-align: center;
+  width: 100%;
+}
+.staff-name { font-family:var(--body); font-weight:600; font-size:24px; color:#e8e4e0; } /* AUMENTATO da 15px */
+.staff-role { font-family:var(--mono); font-size:15px; letter-spacing:2px; text-transform:uppercase; }
 .role-owner{color:var(--gold);} .role-admin{color:var(--red-glow);} .role-mod{color:#5dade2;}
 
 #rules-panel { flex:0 1 auto; overflow: hidden; display: flex; min-height: 200px; flex-direction: column ;}
@@ -610,8 +612,9 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--dark); fo
 
   <div id="welcome-row">
     <div class="welcome-module" id="welcome-left-mod">
+      
       <div>
-        <div id="welcome-greet">Caricamento...<span id="js-player-name"></span></div>
+        <div id="welcome-greet">Caricamento...</div>
       </div>
     </div>
     <div class="welcome-module" id="welcome-right-mod">
@@ -644,6 +647,8 @@ html,body { width:100%; height:100%; overflow:hidden; background:var(--dark); fo
       <div class="panel-title">Staff</div>
       <div class="staff-list">
         <div class="staff-member">
+          <img class="staff-avatar" src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/fe/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg" alt="Avatar">
+          <div class="staff-info">
             <div class="staff-name">Hero05IT4</div>
             <div class="staff-role role-owner">Owner</div>
           </div>
@@ -956,19 +961,15 @@ function fetchSteam(steamid, callback) {
     function(url) { return 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url); }
   ];
 
-function tryProxy(i) {
+  function tryProxy(i) {
     if (i >= proxies.length) {
       console.error("Tutti i proxy CORS hanno fallito per:", steamUrl);
       callback(null, null);
       return;
     }
 
-    var controller = new AbortController();
-    var timeoutId = setTimeout(function() { controller.abort(); }, 4000); // 4s max per proxy
-
-    fetch(proxies[i](steamUrl), { signal: controller.signal })
+    fetch(proxies[i](steamUrl))
       .then(function(response) {
-        clearTimeout(timeoutId);
         if (!response.ok) throw new Error("HTTP " + response.status);
         return response.text();
       })
@@ -986,11 +987,12 @@ function tryProxy(i) {
         callback(avatar, name);
       })
       .catch(function(err) {
-        clearTimeout(timeoutId);
         console.warn("Proxy #" + (i + 1) + " fallito (" + err.message + "), provo il successivo...");
         tryProxy(i + 1);
       });
   }
+
+  tryProxy(0);
 }
 
 var OWNER_STEAMID64 = '76561198419173318';
