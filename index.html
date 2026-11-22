@@ -740,6 +740,116 @@ var mapThumbnails = {};
 var BASE_URL = '.';
 var _lastPct = 0; // Traccia la percentuale reale per evitare balzi all'indietro
 var _barFallback; // Dichiariamo il timer globalmente per evitare conflitti
+// ── Nomi mappe (stessa regola del gioco) ──────────────────────────────────────
+var MAP_NAMES = {
+  "ttt_heavenandhell": "Heaven and Hell",
+  "ttt_nuketown_d_light": "Nuketown",
+  "ttt_rust_v2c": "Rust",
+  "ttt_denizen": "Denizen",
+  "ttt_forestpath": "Forest Path",
+  "zs_gleam_v23": "Gleam",
+  "ttt_italy": "Italy",
+  "ttt_terrortrain_2020_b5": "Terror Train",
+  "ttt_trinity_church": "Trinity Church",
+  "ttt_citadel": "Citadel",
+  "ttt_de_dolls_2008_v3_safe": "Dolls",
+  "ttt_industry": "Industry",
+  "ttt_mcisland_b1": "Minecraft Island",
+  "ttt_richland_remix_v1": "Richland Remix",
+  "ttt_simple_otat1": "Simple",
+  "ttt_standoff": "Standoff",
+  "ttt_bb_teenroom_v2": "Teen Room",
+  "ttt_thematrix": "The Matrix",
+  "ttt_67thway_v14": "67th Way",
+  "ttt_abandonedsubway": "Abandoned Subway",
+  "ttt_airbus_b3": "Airbus",
+  "ttt_aircraft_v1b": "Aircraft",
+  "ttt_arctic": "Arctic",
+  "ttt_bank_b13": "Bank",
+  "ttt_bikinibottom_v1c": "Bikini Bottom",
+  "ttt_cape_town_revamped": "Cape Town",
+  "ttt_casino_fix": "Casino",
+  "ttt_castle_2011_v3_day": "Castle",
+  "ttt_clue_se_2017": "Clue",
+  "ttt_cluedo_b5_improved1": "Cluedo",
+  "ttt_cod_stalingrad": "Stalingrad",
+  "ttt_cod4_vacant": "Vacant",
+  "ttt_community_bowling_v5a": "Community Bowling",
+  "ttt_community_pool": "Community Pool",
+  "ttt_community_pool_remake": "Community Pool Remake",
+  "ttt_cryptic_keep_v6": "Cryptic Keep",
+  "ttt_dimmsdale_v2": "Dimmsdale",
+  "ttt_doom_generv2": "Doom",
+  "ttt_eliisa": "Eliisa",
+  "ttt_fastfood_a6": "Fast Food",
+  "ttt_forest_final": "Forest",
+  "ttt_glacier": "Glacier",
+  "ttt_hogswarts": "Hogwarts",
+  "ttt_innocentmotel_v1": "Innocent Motel",
+  "ttt_island_2022": "Island",
+  "ttt_islandstreets": "Island Streets",
+  "ttt_lego": "Lego",
+  "ttt_lost_temple_v2": "Lost Temple",
+  "ttt_magma_v2b": "Magma",
+  "ttt_mc_mineshaft": "Minecraft Mineshaft",
+  "ttt_mc_skylandv5": "Minecraft Skyland",
+  "ttt_minecraft_b5": "Minecraft",
+  "ttt_minecraft_haven": "Minecraft Haven",
+  "ttt_minecraft_redux": "Minecraft Redux",
+  "ttt_minecraftcity_v5": "Minecraft City",
+  "ttt_mw2_highrise": "Highrise",
+  "ttt_nightmare_church": "Nightmare Church",
+  "ttt_oldruins": "Old Ruins",
+  "ttt_outset_island": "Outset Island",
+  "ttt_overwatch": "Overwatch",
+  "ttt_pelicantown": "Pelican Town",
+  "ttt_poolparty": "Pool Party",
+  "ttt_riverside_b3": "Riverside",
+  "ttt_rooftops_2016_v1": "Rooftops",
+  "ttt_roy_the_ship": "Roy the Ship",
+  "ttt_shadowmoses": "Shadow Moses",
+  "ttt_shipment_v1": "Shipment",
+  "ttt_skyscraper": "Skyscraper",
+  "ttt_stargate_v3": "Stargate",
+  "ttt_theship_v1": "The Ship",
+  "ttt_tinytown": "Tiny Town",
+  "ttt_trainstation_01_fix2": "Train Station",
+  "ttt_traphouse_v1b": "Trap House",
+  "ttt_volcano": "Volcano",
+  "ttt_waterworld_remastered_2020": "Waterworld",
+  "ttt_mttresort_v2": "MTT Resort",
+  "ttt_twice": "Twice",
+  "ttt_submarine": "Submarine",
+  "ttt_office_v1a": "Office",
+  "ttt_crummycradle_a4": "Crummy Cradle",
+  "ttt_avalon": "Avalon",
+  "ttt_amsterville_2015": "Amsterville",
+  "ttt_orange_v7_nocrash": "Orange",
+  "ttt_unatco_hq": "UNATCO HQ",
+  "ttt_dust2_classic": "Dust 2",
+  "ttt_windmill_sky": "Windmill Sky",
+  "ttt_avalanched": "Avalanched",
+  "ttt_pinnacle": "Pinnacle",
+  "ttt_pwp_v4": "PWP",
+  "ttt_assault_v1b": "Assault",
+  "ttt_courtyard": "Courtyard",
+  "ttt_lttp_kakariko_a5": "Kakariko",
+  "ttt_space_station": "Space Station"
+};
+
+function prettyMapName(code) {
+  var key = String(code || '').toLowerCase().replace(/\.bsp$/, '');
+  if (MAP_NAMES[key]) return MAP_NAMES[key];
+
+  var words = [];
+  key.split(/[_\s]+/).filter(Boolean).forEach(function (tok, i) {
+    if (i === 0 && (tok === 'ttt' || tok === 'ttt2')) return;
+    tok = tok.replace(/\d/g, '');
+    if (tok.length > 1) words.push(tok.charAt(0).toUpperCase() + tok.slice(1));
+  });
+
+  return words.length ? words.join(' ') : code;
+}
 // --- CARICAMENTO DATABASE MAPPE ---
 
 fetch('maps.json')
@@ -1018,7 +1128,7 @@ function GameDetails(serverName, serverURL, mapName, maxPlayers, steamID, gamemo
 
   // Logica mappa...
   var mapDisplay = document.getElementById('map-name');
-  if (mapDisplay) mapDisplay.textContent = mapName;
+  if (mapDisplay) mapDisplay.textContent = prettyMapName(mapName);
   
   // Richiama le funzioni grafiche
   _currentPlayers = _playerNames.length; 
@@ -1047,7 +1157,7 @@ function SetMapName(mapName) {
   var mapImg = document.getElementById('map-image');
   var cleanName = mapName.toLowerCase();
 
-  if (mapDisplay) mapDisplay.textContent = mapName;
+  if (mapDisplay) mapDisplay.textContent = prettyMapName(mapName);
 
   if (mapThumbnails[cleanName]) {
     var url = mapThumbnails[cleanName];
